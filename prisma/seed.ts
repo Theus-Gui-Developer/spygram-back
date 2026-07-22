@@ -27,22 +27,6 @@ async function main() {
   const leadCount = await prisma.lead.count();
   console.log(`Leads existentes: ${leadCount}`);
 
-  const defaultOrigins = [
-    { origin: 'http://localhost:3001', label: 'Admin local' },
-    { origin: 'http://localhost:5173', label: 'Frontend Vite local' },
-    { origin: 'http://localhost:5174', label: 'Frontend Vite alternativo' },
-    { origin: 'http://localhost:3107', label: 'Frontend legado local' },
-  ];
-
-  for (const item of defaultOrigins) {
-    await prisma.allowedOrigin.upsert({
-      where: { origin: item.origin },
-      update: {},
-      create: { origin: item.origin, label: item.label, enabled: true },
-    });
-  }
-  console.log(`Origens padrão liberadas: ${defaultOrigins.length}`);
-
   console.log('Seed concluido com sucesso.');
 }
 
