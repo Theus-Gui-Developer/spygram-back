@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id               Int       @id @default(autoincrement())
+  leadId           String    @unique @map("lead_id")
+  fingerprint      String?   @map("fingerprint")
+  ip               String    @map("ip")
+  username         String?   @map("username")
+  fullName         String?   @map("full_name")
+  profilePicUrl    String?   @map("profile_pic_url")
+  followerCount    Int       @default(0) @map("follower_count")
+  followingCount   Int       @default(0) @map("following_count")
+  mediaCount       Int       @default(0) @map("media_count")
+  isPrivate        Boolean?  @map("is_private")
+  geoCountry       String?   @map("geo_country")
+  geoRegion        String?   @map("geo_region")
+  geoCity          String?   @map("geo_city")
+  geoOrg            String?   @map("geo_org")
+  geoLat           Float?    @map("geo_lat")
+  geoLon           Float?    @map("geo_lon")
+  geoDisplayName   String?   @map("geo_display_name")
+  geoUpdatedAt     DateTime? @map("geo_updated_at")
+  searchCount      Int       @default(1) @map("search_count")
+  firstSearchAt    DateTime  @default(now()) @map("first_search_at")
+  lastSearchAt     DateTime  @default(now()) @map("last_search_at")
+
+  @@index([ip], map: "leads_ip_idx")
+  @@index([fingerprint], map: "leads_fingerprint_idx")
+  @@map("leads")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @map("email")
+  password  String   @map("password")
+  name      String?  @map("name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model SearchLog {
+  id            Int      @id @default(autoincrement())
+  endpoint      String   @map("endpoint")
+  username      String?  @map("username")
+  ip            String?  @map("ip")
+  fingerprint   String?  @map("fingerprint")
+  success       Boolean  @map("success")
+  durationMs    Int?     @map("duration_ms")
+  errorMessage  String?  @map("error_message")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt], map: "search_logs_created_at_idx")
+  @@index([endpoint], map: "search_logs_endpoint_idx")
+  @@index([username], map: "search_logs_username_idx")
+  @@index([ip], map: "search_logs_ip_idx")
+  @@map("search_logs")
+}
+
+model AllowedOrigin {
+  id        Int      @id @default(autoincrement())
+  origin    String   @unique @map("origin")
+  label     String?  @map("label")
+  enabled   Boolean  @default(true) @map("enabled")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([enabled], map: "allowed_origins_enabled_idx")
+  @@map("allowed_origins")
+}
+
