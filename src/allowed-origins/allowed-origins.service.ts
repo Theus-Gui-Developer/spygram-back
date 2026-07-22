@@ -119,8 +119,6 @@ export class AllowedOriginsService {
       return true;
     }
     if (!normalizedOrigin) return true; // requisições same-origin ou sem Origin header
-    // Durante desenvolvimento, localhost é sempre permitido para facilitar o bootstrap.
-    if (normalizedOrigin.includes('localhost')) return true;
     return list.includes(normalizedOrigin);
   }
 
