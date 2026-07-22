@@ -3,10 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const defaultOrigins = [
-  { origin: 'http://localhost:3001', label: 'Admin local' },
-  { origin: 'http://localhost:5173', label: 'Frontend Vite local' },
-  { origin: 'http://localhost:5174', label: 'Frontend Vite alternativo' },
-  { origin: 'http://localhost:3107', label: 'Frontend legado local' },
+  { origin: 'https://spygram-admin.vercel.app/', label: 'Admin Vercel' },
 ];
 
 async function main() {

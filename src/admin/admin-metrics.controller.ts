@@ -35,19 +35,30 @@ export class AdminMetricsController {
     const dateRange = parseDateRange(query);
     const hasDateRange = Object.keys(dateRange).length > 0;
 
+    const requestFilter = { endpoint: 'instagram.busca_completa' };
+
     const [total, createdToday, graceExpired, active, totalCalls, failedCalls] =
       await this.prisma.$transaction([
         this.prisma.lead.count(),
-        this.prisma.lead.count({ where: { firstSearchAt: { gte: today } } }),
+        this.prisma.searchLog.count({
+          where: {
+            ...requestFilter,
+            createdAt: { gte: today },
+          },
+        }),
         this.prisma.lead.count({ where: { firstSearchAt: { lte: cutoff } } }),
         this.prisma.lead.count({
           where: { firstSearchAt: { gt: cutoff }, searchCount: { gt: 0 } },
         }),
         this.prisma.searchLog.count({
-          where: hasDateRange ? { createdAt: dateRange } : {},
+          where: {
+            ...requestFilter,
+            ...(hasDateRange ? { createdAt: dateRange } : {}),
+          },
         }),
         this.prisma.searchLog.count({
           where: {
+            ...requestFilter,
             success: false,
             ...(hasDateRange ? { createdAt: dateRange } : {}),
           },
@@ -69,7 +80,10 @@ export class AdminMetricsController {
     const hasDateRange = Object.keys(dateRange).length > 0;
     const results = await this.prisma.searchLog.groupBy({
       by: ['createdAt'],
-      where: hasDateRange ? { createdAt: dateRange } : {},
+      where: {
+        endpoint: 'instagram.busca_completa',
+        ...(hasDateRange ? { createdAt: dateRange } : {}),
+      },
       _count: { id: true },
       _sum: { durationMs: true },
       orderBy: { createdAt: 'asc' },

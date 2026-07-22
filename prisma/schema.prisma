@@ -31,6 +31,8 @@ model Lead {
   firstSearchAt    DateTime  @default(now()) @map("first_search_at")
   lastSearchAt     DateTime  @default(now()) @map("last_search_at")
 
+  searchLogs SearchLog[]
+
   @@index([ip], map: "leads_ip_idx")
   @@index([fingerprint], map: "leads_fingerprint_idx")
   @@map("leads")
@@ -53,15 +55,20 @@ model SearchLog {
   username      String?  @map("username")
   ip            String?  @map("ip")
   fingerprint   String?  @map("fingerprint")
+  leadId        String?  @map("lead_id")
   success       Boolean  @map("success")
+  cached        Boolean  @default(false) @map("cached")
   durationMs    Int?     @map("duration_ms")
   errorMessage  String?  @map("error_message")
   createdAt     DateTime @default(now()) @map("created_at")
+
+  lead Lead? @relation(fields: [leadId], references: [leadId])
 
   @@index([createdAt], map: "search_logs_created_at_idx")
   @@index([endpoint], map: "search_logs_endpoint_idx")
   @@index([username], map: "search_logs_username_idx")
   @@index([ip], map: "search_logs_ip_idx")
+  @@index([leadId], map: "search_logs_lead_id_idx")
   @@map("search_logs")
 }
 

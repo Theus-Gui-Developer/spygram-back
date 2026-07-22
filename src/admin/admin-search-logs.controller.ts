@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -53,6 +54,7 @@ export class AdminSearchLogsController {
         orderBy: { createdAt: 'desc' },
         skip: (query.page - 1) * query.limit,
         take: query.limit,
+        include: { lead: true },
       }),
       this.prisma.searchLog.count({ where }),
     ]);
@@ -68,6 +70,12 @@ export class AdminSearchLogsController {
 
   @Get(':id')
   async detail(@Param('id', ParseIntPipe) id: number) {
-    return this.prisma.searchLog.findUnique({ where: { id } });
+    return this.prisma.searchLog.findUnique({ where: { id }, include: { lead: true } });
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.prisma.searchLog.delete({ where: { id } });
+    return { deleted: true, id };
   }
 }

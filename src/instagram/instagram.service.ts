@@ -71,13 +71,17 @@ export class InstagramService {
   ): Promise<BuscaCompletaDto> {
     const start = Date.now();
     const status = await this.leads.checkStatus(ip, fingerprint, username);
+    const leadId = createHash('sha256')
+      .update(fingerprint || ip)
+      .digest('hex');
+
     if (!status.canSearch) {
       await this.logSearch(
         'instagram.busca_completa',
         username,
         false,
         start,
-        { ip, fingerprint },
+        { ip, fingerprint, leadId },
         'Search not allowed',
       );
       throw new ForbiddenException({ message: 'Search not allowed', status });
@@ -86,8 +90,10 @@ export class InstagramService {
     const key = `instagram:complete:${username}`;
     const cached = await this.cache.get<BuscaCompletaDto>(key);
     let result: BuscaCompletaDto;
+    let fromCache = false;
     try {
       if (cached) {
+        fromCache = true;
         result = { ...cached, meta: { ...cached.meta, cached: true } };
       } else {
         const profile = await this.fetchPerfil(username);
@@ -141,9 +147,6 @@ export class InstagramService {
         await this.cache.set(key, result, this.ttl());
       }
 
-      const leadId = createHash('sha256')
-        .update(fingerprint || ip)
-        .digest('hex');
       await this.leads.saveSearch(
         leadId,
         ip,
@@ -156,7 +159,9 @@ export class InstagramService {
         username,
         true,
         start,
-        { ip, fingerprint },
+        { ip, fingerprint, leadId },
+        undefined,
+        fromCache,
       );
       return result;
     } catch (error) {
@@ -165,8 +170,9 @@ export class InstagramService {
         username,
         false,
         start,
-        { ip, fingerprint },
+        { ip, fingerprint, leadId },
         error instanceof Error ? error.message : 'unknown',
+        false,
       );
       throw error;
     }
@@ -177,8 +183,9 @@ export class InstagramService {
     username: string,
     success: boolean,
     startTime: number,
-    context?: { ip?: string; fingerprint?: string },
+    context?: { ip?: string; fingerprint?: string; leadId?: string },
     errorMessage?: string,
+    cached = false,
   ): Promise<void> {
     try {
       await this.prisma.searchLog.create({
@@ -187,7 +194,9 @@ export class InstagramService {
           username,
           ip: context?.ip || null,
           fingerprint: context?.fingerprint || null,
+          leadId: context?.leadId || null,
           success,
+          cached,
           durationMs: Date.now() - startTime,
           errorMessage: errorMessage || null,
         },
