@@ -4,8 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@spygram.com';
-const ADMIN_PASSWORD =
-  process.env.ADMIN_PASSWORD ?? 'YRW152xK2vjROkKFCqj5nedYVQYXrYgV5/xd0p9iL+g=';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123';
 const ADMIN_NAME = process.env.ADMIN_NAME ?? 'Administrador';
 
 async function main() {
